@@ -5,7 +5,8 @@ import App from './App.jsx'
 import Home from './pages/Home.tsx'
 import Preferences from './pages/Preferences.tsx'
 import Digest from './pages/Digest.tsx'
-
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const router = createBrowserRouter([
   {
@@ -19,11 +20,15 @@ const router = createBrowserRouter([
   },
 ])
 
+const queryClient = new QueryClient();
 const root = document.getElementById('root');
 if (root) {
   ReactDOM.createRoot(root).render(
     <React.StrictMode>
-      <RouterProvider router={router} />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </React.StrictMode>,
   )
 }
