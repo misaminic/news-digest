@@ -1,4 +1,6 @@
-export const fetchArticles = async(topics: string[]) => {
+import type { Article, AnalysisResult } from '../types/ArticleDTO'
+
+export const fetchArticles = async(topics: string[]): Promise<Article[]> => {
     if (!topics || topics.length === 0) {
         throw new Error("No topics selected");
       }
@@ -12,4 +14,80 @@ export const fetchArticles = async(topics: string[]) => {
     const data = await res.json();
     return data.articles;
   }
+  
+  export async function analyzeTone(text: string): Promise<AnalysisResult> {
+    const prompt = `Analyze the emotional tone of the following text and provide a brief explanation. Respond ONLY in JSON format with this exact structure:
+    {
+      "emotion": "positive/negative/neutral/mixed",
+      "explanation": "Brief explanation of the emotional tone"
+    }
+    
+    Text to analyze: "${text}"`
+
+    try {
+      const res = await fetch("http://localhost:11434/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "gemma3:1b",
+          prompt,
+          stream: false
+        }),
+      })
+
+      if (!res.ok) {
+        throw new Error(`AI request failed with status: ${res.status}`)
+      }
+
+      const data = await res.json()
+      const textResponse = data.response || ""
+      
+      // Try to extract JSON from the response
+      const jsonMatch = textResponse.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        try {
+          return JSON.parse(jsonMatch[0])
+        } catch (parseError) {
+          console.error("JSON parsing failed:", parseError)
+          return { 
+            emotion: "unknown", 
+            explanation: "Failed to parse AI response", 
+            raw: textResponse 
+          }
+        }
+      }
+      
+      // Fallback if no JSON found
+      return { 
+        emotion: "unknown", 
+        explanation: "No valid JSON response found", 
+        raw: textResponse 
+      }
+    } catch (error) {
+      console.error("AI analysis error:", error)
+      
+      if (error instanceof Error) {
+        if (error.message.includes('404')) {
+          return { 
+            emotion: "error", 
+            explanation: "Ollama server not found. Please make sure Ollama is running and the model 'gemma3:1b' is available.",
+            raw: error.message
+          }
+        } else if (error.message.includes('fetch')) {
+          return { 
+            emotion: "error", 
+            explanation: "Cannot connect to Ollama server. Please check if Ollama is running on localhost:11434.",
+            raw: error.message
+          }
+        }
+      }
+      
+      return { 
+        emotion: "error", 
+        explanation: `Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        raw: error instanceof Error ? error.message : 'Unknown error'
+      }
+    }
+  }
+  
   
