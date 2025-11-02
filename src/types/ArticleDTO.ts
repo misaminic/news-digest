@@ -12,6 +12,7 @@ export type Article = {
   }
 
 export type AnalysisResult = {
+    truthPercentage:number  
     emotion: string
     explanation: string
     raw?: string

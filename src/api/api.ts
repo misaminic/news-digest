@@ -16,8 +16,9 @@ export const fetchArticles = async(topics: string[]): Promise<Article[]> => {
   }
   
   export async function analyzeTone(text: string): Promise<AnalysisResult> {
-    const prompt = `Analyze the emotional tone of the following text and provide a brief explanation. Respond ONLY in JSON format with this exact structure:
+    const prompt = `Analyze the emotional tone of the following text and provide a brief explanation. Give estimation in percentage how likely is it that the content is true. Respond ONLY in JSON format with this exact structure:
     {
+      "truthPercentage": "number from 0 - 100 %" 
       "emotion": "positive/negative/neutral/mixed",
       "explanation": "Brief explanation of the emotional tone"
     }

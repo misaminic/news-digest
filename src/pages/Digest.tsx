@@ -83,6 +83,11 @@ export default function Digest() {
                 <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-sm font-semibold text-blue-800">AI Analysis:</span>
+                    <div className={`px-2 py-1 rounded-full text-xs font-medium`}>
+                    <span>
+                      Truth percentage: {analysis[String(idx)].truthPercentage}
+                    </span>
+                    </div>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       analysis[String(idx)].emotion === 'positive' ? 'bg-green-100 text-green-800' :
                       analysis[String(idx)].emotion === 'negative' ? 'bg-red-100 text-red-800' :
@@ -90,12 +95,13 @@ export default function Digest() {
                       analysis[String(idx)].emotion === 'mixed' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-gray-100 text-gray-800'
                     }`}>
-                      {analysis[String(idx)].emotion}
+                      Emotional tone of the artical: {analysis[String(idx)].emotion}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    {analysis[String(idx)].explanation}
-                  </p>
+                  <div>Content summary:</div>
+                  <div className="text-sm text-gray-700 leading-relaxed">
+                   {analysis[String(idx)].explanation}
+                  </div>
                   {analysis[String(idx)].raw && (
                     <details className="mt-2">
                       <summary className="text-xs text-gray-500 cursor-pointer">Raw response</summary>
