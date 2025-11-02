@@ -163,6 +163,10 @@ export default function Digest() {
                   <div className="text-sm text-gray-700 leading-relaxed">
                     {analysis[String(idx)].explanation}
                   </div>
+                  <div>Summary:</div>
+                  <div>
+                    {analysis[String(idx)].summary}
+                  </div>
                 </div>
               )}
             </div>

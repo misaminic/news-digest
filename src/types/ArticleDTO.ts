@@ -15,6 +15,7 @@ export type AnalysisResult = {
     truthPercentage:number  
     emotion: string
     explanation: string
+    summary: string
     raw?: string
   }
   
