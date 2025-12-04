@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePreferencesStore } from '../store/usePreferencesStore'
 import { useQuery } from '@tanstack/react-query'
 import type { PreferencesState } from '../store/usePreferencesStore'
@@ -13,16 +13,36 @@ export default function Digest() {
   const [analysis, setAnalysis] = useState<Record<string, AnalysisResult>>({})
   const [analyzingId, setAnalyzingId] = useState<string | null>(null)
 
+  const topicsKey = [...topics].sort().join(',')
+  
   const {
     data: articles,
     isLoading,
     isError,
     error,
   } = useQuery({
-    queryKey: ['articles', [...topics].sort().join(',')],
-    queryFn: () => fetchArticles([...topics]),
+    queryKey: ['articles', topicsKey],
+    queryFn: () => {
+      console.log('React Query: Fetching articles for topics:', topics)
+      return fetchArticles([...topics])
+    },
     enabled: topics.length > 0,
+    retry: 1,
   })
+  
+  console.log('React Query state - queryKey:', topicsKey, 'enabled:', topics.length > 0)
+
+  // Debug logging
+  useEffect(() => {
+    console.log('=== Digest Component State ===')
+    console.log('Topics:', topics)
+    console.log('Topics length:', topics.length)
+    console.log('Articles count:', articles?.length || 0)
+    console.log('Is loading:', isLoading)
+    console.log('Has error:', isError)
+    console.log('Error:', error)
+    console.log('=============================')
+  }, [topics, articles, isLoading, isError, error])
   
   const availableTopics = [
     'Technology',
@@ -103,12 +123,19 @@ export default function Digest() {
               {availableTopics.map(topic => (
                 <label
                   key={topic}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    console.log('Topic clicked:', topic)
+                    console.log('Current topics before:', topics)
                     if (topics.includes(topic)) {
+                      console.log('Removing topic:', topic)
                       removeTopic(topic)
                     } else {
+                      console.log('Adding topic:', topic)
                       addTopic(topic)
                     }
+                    console.log('Current topics after:', topics)
                   }}
                   style={{
                     cursor: 'pointer',
@@ -135,6 +162,23 @@ export default function Digest() {
             </div>
           </div>
         </div>
+
+        {/* No Topics Selected Message */}
+        {topics.length === 0 && (
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '64px 32px',
+              backgroundColor: '#1e293b',
+              borderRadius: '16px',
+              border: '2px solid #475569',
+            }}
+          >
+            <p style={{ fontSize: '18px', color: '#94a3b8', margin: 0 }}>
+              Select at least one topic to view articles
+            </p>
+          </div>
+        )}
 
         {/* Loading State */}
         {isLoading && (
@@ -243,9 +287,9 @@ export default function Digest() {
         )} */}
 
         {/* Articles List */}
-        {true && (
+        {articles && articles.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            {articles?.map((article: Article, idx: number) => (
+            {articles.map((article: Article, idx: number) => (
               <article
                 key={idx}
                 style={{

@@ -5,14 +5,36 @@ export const fetchArticles = async (topics: string[]): Promise<Article[]> => {
     throw new Error('No topics selected')
   }
 
-  const res = await fetch(
-    `https://newsapi.org/v2/everything?q=${topics.join(' OR ')}&pageSize=10&apiKey=${import.meta.env.VITE_NEWS_API_KEY}`
-  )
+  const query = topics.join(' OR ')
+  const encodedQuery = encodeURIComponent(query)
+  const apiKey = import.meta.env.VITE_NEWS_API_KEY
 
-  if (!res.ok) throw new Error('Failed to fetch articles')
+  if (!apiKey) {
+    throw new Error('NewsAPI key is not configured')
+  }
+
+  const url = `https://newsapi.org/v2/everything?q=${encodedQuery}&pageSize=10&apiKey=${apiKey}`
+  
+  console.log('Fetching articles for topics:', topics)
+  console.log('API URL:', url.replace(apiKey, '***'))
+
+  const res = await fetch(url)
+
+  if (!res.ok) {
+    const errorText = await res.text()
+    console.error('NewsAPI error:', res.status, errorText)
+    throw new Error(`Failed to fetch articles: ${res.status} ${res.statusText}`)
+  }
 
   const data = await res.json()
-  return data.articles
+  
+  if (data.status === 'error') {
+    console.error('NewsAPI error response:', data)
+    throw new Error(data.message || 'Failed to fetch articles')
+  }
+
+  console.log('Fetched articles:', data.articles?.length || 0)
+  return data.articles || []
 }
 
 export async function analyzeTone(text: string): Promise<AnalysisResult> {

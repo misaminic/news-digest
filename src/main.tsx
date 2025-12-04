@@ -5,6 +5,7 @@ import './index.css'
 import App from './App.jsx'
 import Home from './pages/Home.tsx'
 import Digest from './pages/Digest.tsx'
+import Preferences from './pages/Preferences.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
@@ -14,6 +15,7 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       { path: '/', element: <Home /> },
+      { path: '/preferences', element: <Preferences /> },
       { path: '/digest', element: <Digest /> },
     ],
   },
